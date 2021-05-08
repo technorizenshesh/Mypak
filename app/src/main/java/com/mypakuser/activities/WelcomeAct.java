@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.mypakuser.R;
 import com.mypakuser.databinding.ActivityWelcomeBinding;
+import com.mypakuser.utils.ProjectUtil;
 
 public class WelcomeAct extends AppCompatActivity {
 
@@ -19,7 +20,7 @@ public class WelcomeAct extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_welcome);
-
+        ProjectUtil.changeStatusBarColor(WelcomeAct.this);
         init();
 
     }

@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.mypakuser.R;
 import com.mypakuser.databinding.ActivityGetStartedBinding;
+import com.mypakuser.utils.ProjectUtil;
 
 public class GetStartedAct extends AppCompatActivity {
 
@@ -19,7 +20,7 @@ public class GetStartedAct extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_get_started);
-
+        ProjectUtil.changeStatusBarColor(GetStartedAct.this);
         init();
 
     }

@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.mypakuser.R;
 import com.mypakuser.databinding.ActivityVerifyBinding;
+import com.mypakuser.utils.ProjectUtil;
 
 public class VerifyAct extends AppCompatActivity {
 
@@ -19,7 +20,7 @@ public class VerifyAct extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_verify);
-
+        ProjectUtil.changeStatusBarColor(VerifyAct.this);
         init();
 
     }
@@ -27,7 +28,7 @@ public class VerifyAct extends AppCompatActivity {
     private void init() {
 
         binding.btVerify.setOnClickListener(v -> {
-            startActivity(new Intent(mContext,CarSelectAct.class));
+            startActivity(new Intent(mContext,HomeAct.class));
         });
 
     }

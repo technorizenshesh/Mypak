@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.view.WindowManager;
 
 import com.mypakuser.R;
+import com.mypakuser.utils.ProjectUtil;
 
 public class SplashAct extends AppCompatActivity {
 
@@ -19,6 +20,7 @@ public class SplashAct extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        ProjectUtil.changeStatusBarColor(SplashAct.this);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         new Handler().postDelayed(new Runnable() {
             @Override

@@ -29,4 +29,71 @@
     <string name="submit">Submit</string>
     <string name="what_s_the_size">What\'s the size</string>
     <string name="fit_in_a_pocket">Fit in a pocket</string>
+    <string name="my_requests">My Requests</string>
+    <string name="pickup_address">Pickup Address</string>
+    <string name="dropoff_address">Dropoff Address</string>
+    <string name="dropoff_dummyaddress">Akshya Nagar 1st Block 1st Cross, Rammurthy nagar, Bangalore-560016</string>
+    <string name="pickup_dummyaddress">9278 Victoria Street NORTH LONDON N28 1CW 175 King Street MILTON KEYNES MK30 4RC</string>
+    <string name="parcel_detail">Parcel Detail</string>
+    <string name="my_sendings">My Sendings</string>
+    <string name="messages">Messages</string>
+    <string name="maps_api_key">AIzaSyD5KJs-4W2v_SJM5oJrwrC92KCcu34m9do</string>
+    <string name="change_password">Change Password</string>
+    <string name="logout">Logout</string>
+    <string name="my_profile">My Profile</string>
+    <string name="recipient_s_name">Recipient\'s Name</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="type_a_message">Type a message</string>
+    <string name="enter_old_password">Enter old password</string>
+    <string name="enter_new_password">Enter new password</string>
+    <string name="add_parcel">Add Parcel Request</string>
+    <string name="select_pick_up_address">Select Pickup address</string>
+    <string name="select_drop_off_address">Select dropoff address</string>
+    <string name="select_pickup_date">Select pickup date</string>
+    <string name="select_drop_date">Select dropoff date</string>
+    <string name="mobile_number">Mobile number</string>
+    <string name="item_detail">Item Detail</string>
+    <string name="delivery_instructions">Delivery Instruction</string>
+    <string name="upload">Upload</string>
+    <string name="logout_text">Are you sure you want to logout?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="pickup_date">Pickup Date</string>
+    <string name="dropoff_date">Dropoff Date</string>
+    <string name="applied_bids">Applied Bids</string>
+    <string name="price">Price</string>
+
+    <string-array name="parcel_quantity">
+        <item>Select Quantity</item>
+        <item>Less then 1KG</item>
+        <item>1KG - 5KG</item>
+        <item>5KG - 10KG</item>
+        <item>10KG - 15KG</item>
+        <item>15KG - 20KG</item>
+        <item>20KG - 25KG</item>
+        <item>25KG - 30KG</item>
+        <item>30KG - 35KG</item>
+        <item>35KG - 40KG</item>
+        <item>40KG Above</item>
+    </string-array>
+
+    <string-array name="vehicle_type">
+        <item>Select Vehicle Type</item>
+        <item>Bicycle</item>
+        <item>Motorcycle</item>
+        <item>VAN</item>
+        <item>Any</item>
+    </string-array>
+
+    <string-array name="parcel_item_category">
+        <item>Select Item Category</item>
+        <item>Document</item>
+        <item>Food</item>
+        <item>Cloting</item>
+        <item>Electronics</item>
+        <item>Fragile</item>
+        <item>Medical</item>
+        <item>Other</item>
+    </string-array>
+
 </resources>

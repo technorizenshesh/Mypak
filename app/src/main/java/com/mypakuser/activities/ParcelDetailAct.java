@@ -7,30 +7,29 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.mypakuser.R;
-import com.mypakuser.databinding.ActivityForgotPasswordBinding;
+import com.mypakuser.databinding.ActivityParcelDetailBinding;
 import com.mypakuser.utils.ProjectUtil;
 
-public class ForgotPasswordAct extends AppCompatActivity {
+public class ParcelDetailAct extends AppCompatActivity {
 
-    Context mContext = ForgotPasswordAct.this;
-    ActivityForgotPasswordBinding binding;
+    Context mContext = ParcelDetailAct.this;
+    ActivityParcelDetailBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_forgot_password);
-        ProjectUtil.changeStatusBarColor(ForgotPasswordAct.this);
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_parcel_detail);
+        ProjectUtil.changeStatusBarColor(ParcelDetailAct.this);
         init();
 
     }
 
     private void init() {
 
-        binding.btSubmit.setOnClickListener(v -> {
+        binding.ivBack.setOnClickListener(v -> {
             finish();
         });
 
     }
-
 
 }

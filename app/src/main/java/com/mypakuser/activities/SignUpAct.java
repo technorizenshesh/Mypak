@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.mypakuser.R;
 import com.mypakuser.databinding.ActivitySignUpBinding;
+import com.mypakuser.utils.ProjectUtil;
 
 public class SignUpAct extends AppCompatActivity {
 
@@ -19,7 +20,7 @@ public class SignUpAct extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_sign_up);
-
+        ProjectUtil.changeStatusBarColor(SignUpAct.this);
         init();
 
     }

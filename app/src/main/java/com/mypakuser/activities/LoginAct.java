@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.mypakuser.R;
 import com.mypakuser.databinding.ActivityLoginBinding;
+import com.mypakuser.utils.ProjectUtil;
 
 public class LoginAct extends AppCompatActivity {
 
@@ -19,12 +20,16 @@ public class LoginAct extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_login);
-
+        ProjectUtil.changeStatusBarColor(LoginAct.this);
         init();
 
     }
 
     private void init() {
+        binding.btLogin.setOnClickListener(v -> {
+            startActivity(new Intent(mContext,HomeAct.class));
+        });
+
         binding.tvSignUp.setOnClickListener(v -> {
             startActivity(new Intent(mContext,SignUpAct.class));
         });
