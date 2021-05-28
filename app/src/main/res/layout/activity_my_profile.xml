@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+            name="data"
+            type="com.mypakuser.models.ModelLogin" />
+    </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -51,7 +57,7 @@
                 app:riv_border_color="@color/white"
                 app:riv_corner_radius="@dimen/_10sdp"
                 android:layout_marginLeft="@dimen/_20sdp"
-                android:src="@drawable/profile"/>
+                android:src="@drawable/default_profile_icon"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -59,6 +65,7 @@
                 android:layout_marginTop="@dimen/_20sdp"
                 android:layout_marginLeft="@dimen/_10sdp"
                 android:layout_marginRight="@dimen/_10sdp"
+                android:paddingBottom="@dimen/_4sdp"
                 android:background="@drawable/orange_grad_back_5"
                 android:orientation="vertical">
 
@@ -84,22 +91,24 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="@dimen/_12sdp"
                             android:textColor="@color/white"
                             android:layout_centerInParent="true"
                             android:fontFamily="@font/circular_bold"
-                            android:text="Jhon Duo"/>
+                            android:text="@{data.result.user_name}"/>
 
                         <TextView
+                            android:id="@+id/tvEmail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="@dimen/_12sdp"
                             android:textColor="@color/white"
                             android:layout_centerInParent="true"
                             android:fontFamily="@font/circular_bold"
-                            android:text="jhon@gmail.com"/>
+                            android:text="@{data.result.email}"/>
 
                     </LinearLayout>
 
@@ -109,6 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/_12sdp"
+                    android:visibility="gone"
                     android:textColor="@color/white"
                     android:layout_margin="@dimen/_8sdp"
                     android:layout_centerInParent="true"

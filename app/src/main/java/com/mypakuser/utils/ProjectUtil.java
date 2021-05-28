@@ -10,7 +10,10 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.mypakuser.R;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -41,16 +44,16 @@ public class ProjectUtil {
         }
     }
 
-//    public static String getPolyLineUrl(Context context, LatLng origin, LatLng dest) {
-//        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-//        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-//        String sensor = "sensor=false";
-//        String parameters = str_origin + "&" + str_dest + "&" + sensor + "&key=" + context.getResources().getString(R.string.places_api_key);
-//        String output = "json";
-//        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
-//        Log.e("PathURL","====>"+url);
-//        return url;
-//    }
+    public static String getPolyLineUrl(Context context, LatLng origin, LatLng dest) {
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+        String sensor = "sensor=false";
+        String parameters = str_origin + "&" + str_dest + "&" + sensor + "&key=" + context.getResources().getString(R.string.places_api_key);
+        String output = "json";
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
+        Log.e("PathURL","====>"+url);
+        return url;
+    }
 
     public static boolean isValidEmail(CharSequence target) {
         return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());

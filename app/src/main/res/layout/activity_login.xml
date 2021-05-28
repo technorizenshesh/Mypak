@@ -189,6 +189,7 @@
                             <ImageView
                                 android:layout_width="@dimen/_50sdp"
                                 android:src="@drawable/tw_circle"
+                                android:visibility="gone"
                                 android:layout_marginLeft="@dimen/_10sdp"
                                 android:layout_gravity="center_horizontal"
                                 android:layout_height="@dimen/_50sdp"/>
@@ -230,7 +231,6 @@
                     </LinearLayout>
 
                 </ScrollView>
-
 
             </LinearLayout>
 

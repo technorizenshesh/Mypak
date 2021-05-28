@@ -25,7 +25,6 @@ public class MyProfileAct extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this,R.layout.activity_my_profile);
         ProjectUtil.changeStatusBarColor(MyProfileAct.this);
         init();
-
     }
 
     private void init() {
@@ -41,7 +40,6 @@ public class MyProfileAct extends AppCompatActivity {
         binding.ivBack.setOnClickListener(v -> {
             finish();
         });
-
 
     }
 

@@ -1,8 +1,10 @@
 plugins {
     id 'com.android.application'
+    id 'com.google.gms.google-services'
 }
 
 android {
+
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
@@ -13,6 +15,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
     }
 
     buildTypes {
@@ -53,7 +60,20 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     implementation 'com.google.android.gms:play-services-maps:15.0.0'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.google.firebase:firebase-analytics:18.0.2'
+    implementation 'com.google.firebase:firebase-auth:19.3.1'
+    implementation 'com.google.firebase:firebase-core:17.2.0'
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
+    implementation 'com.google.firebase:firebase-messaging:21.0.0'
     implementation 'com.hbb20:ccp:2.3.9'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.google.android.libraries.places:places:2.2.0'
+    implementation 'com.googlecode.libphonenumber:libphonenumber:8.2.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.1.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'com.facebook.android:facebook-login:[5,6)'
     implementation 'com.makeramen:roundedimageview:2.3.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'com.intuit.sdp:sdp-android:1.0.6'

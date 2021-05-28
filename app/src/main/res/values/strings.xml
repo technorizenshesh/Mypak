@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Mypak</string>
+    <string name="places_api_key">AIzaSyCNs1wH7F3CUq1_tYEkN_9BjfAvKeJmBLw</string>
+    <string name="facebook_app_id">206211304268201</string>
+    <string name="fb_login_protocol_scheme">fb206211304268201</string>
     <string name="welcome_to_mypack">Welcome to Mypack</string>
     <string name="dummy_text">Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry\'s standard dummy text ever since Lorem Ipsum has been the industry\'s standard dummy text ever since</string>
     <string name="get_started">Get Started</string>
@@ -58,10 +61,41 @@
     <string name="logout_text">Are you sure you want to logout?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="please_enter_username">Please enter username</string>
+    <string name="please_enter_email_add">Please enter email address</string>
+    <string name="please_select_add">Please select address</string>
+    <string name="please_enterlandmark_add">Please enter landmark address</string>
+    <string name="please_enter_pass">Please enter password</string>
+    <string name="please_enter_conf_pass">Please enter confirm password</string>
+    <string name="password_validation_text">Password should be greater than 4 digits</string>
+    <string name="password_not_match">Password not matched</string>
+    <string name="invalid_email">Invalid email</string>
+    <string name="invalid_credentials">Invalid Credentials</string>
+    <string name="please_check_internet">Please check your internet connection!</string>
+    <string name="invalid_number">Invalid phone number</string>
+    <string name="please_enter_phone_add">Please enter phone number</string>
+    <string name="please_wait">Please wait...</string>
+    <string name="enter_6_digit_code">Please enter 6 digit verification code</string>
+    <string name="please_enter_otp">Please enter Otp</string>
     <string name="pickup_date">Pickup Date</string>
     <string name="dropoff_date">Dropoff Date</string>
     <string name="applied_bids">Applied Bids</string>
     <string name="price">Price</string>
+    <string name="ok">Ok</string>
+    <string name="enter_otp">Enter otp</string>
+    <string name="resend">Resend</string>
+    <string name="please_enter_new_pass">Please enter new passsword</string>
+    <string name="please_enter_old_pass">Please enter old password</string>
+    <string name="success">Success</string>
+    <string name="reset_link_msg">Resend link sent to your Mail-Id</string>
+    <string name="all_fields_are_mandatory">All fields are mandatory</string>
+    <string name="please_select_item_quantity">Please select item quantity</string>
+    <string name="please_select_item_category">Please select item category</string>
+    <string name="no_request_found">No Request Found</string>
+    <string name="reject">Reject</string>
+    <string name="accept">Accept</string>
+    <string name="comments">Comments</string>
+    <string name="bid_detail">Bid Details</string>
 
     <string-array name="parcel_quantity">
         <item>Select Quantity</item>

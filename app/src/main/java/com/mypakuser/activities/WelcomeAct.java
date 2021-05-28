@@ -16,7 +16,6 @@ public class WelcomeAct extends AppCompatActivity {
     Context mContext = WelcomeAct.this;
     ActivityWelcomeBinding binding;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
