@@ -110,7 +110,7 @@ public class NearByDriverAct extends AppCompatActivity implements OnMapReadyCall
 
                     String address = ProjectUtil
                             .getCompleteAddressString(mContext, currentLocation.getLatitude()
-                                    , currentLocation.getLongitude());
+                                    ,currentLocation.getLongitude());
 
                     if (!isApiCalled) {
                         pickUpLatLng = new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude());
@@ -128,6 +128,10 @@ public class NearByDriverAct extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void init() {
+
+        binding.ivBack.setOnClickListener(v -> {
+            finish();
+        });
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(NearByDriverAct.this);
