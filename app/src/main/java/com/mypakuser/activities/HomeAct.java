@@ -2,17 +2,22 @@ package com.mypakuser.activities;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,7 +26,23 @@ import android.widget.DatePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
@@ -34,6 +55,8 @@ import com.mypakuser.databinding.ActivityHomeBinding;
 import com.mypakuser.databinding.AddShippDialogBinding;
 import com.mypakuser.models.ModelLogin;
 import com.mypakuser.models.ModelShipRequest;
+import com.mypakuser.newmodule.activities.ParcelStatusAct;
+import com.mypakuser.newmodule.parcelsfragments.ParcelUploadAct;
 import com.mypakuser.utils.Api;
 import com.mypakuser.utils.ApiFactory;
 import com.mypakuser.utils.AppConstant;
@@ -53,22 +76,24 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeAct extends AppCompatActivity {
+import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
+public class HomeAct extends AppCompatActivity implements OnMapReadyCallback {
+
+    private static final int REQUEST_CODE = 1234;
+    private static final int AUTOCOMPLETE_REQUEST_CODE_PICK_UP = 101;
     Context mContext = HomeAct.this;
     ActivityHomeBinding binding;
-    AddShippDialogBinding dialogBinding;
     SharedPref sharedPref;
     ModelLogin modelLogin;
-    LatLng pickUpLatLon,dropOffLatLon;
-    int AUTOCOMPLETE_REQUEST_CODE_PICK_UP = 1,
-            AUTOCOMPLETE_REQUEST_CODE_DESTINATION = 2;
-    Calendar date = Calendar.getInstance();
-    Calendar currentDate = Calendar.getInstance();
-    ModelShipRequest modelShipRequest = null;
-    long pickUpMilliseconds;
-    Dialog dialog;
-    HashMap<String,String> paramHash;
+    GoogleMap mMap;
+    LatLng pickUpLatLng, dropOffLatLng;
+    FusedLocationProviderClient fusedLocationProviderClient;
+    private Location currentLocation;
+    PolylineOptions polylineOptions;
+    private LocationRequest mLocationRequest;
+    private long UPDATE_INTERVAL = 3000;
+    private long FASTEST_INTERVAL = 2000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,50 +102,154 @@ public class HomeAct extends AppCompatActivity {
         ProjectUtil.changeStatusBarColor(HomeAct.this);
         sharedPref = SharedPref.getInstance(mContext);
         modelLogin = sharedPref.getUserDetails(AppConstant.USER_DETAILS);
-        if (!Places.isInitialized()) {
-            Places.initialize(mContext, getString(R.string.places_api_key));
-        }
+
         init();
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
+        fetchLocation();
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        fetchLocation();
         sharedPref = SharedPref.getInstance(mContext);
         binding.navItems.tvName.setText(modelLogin.getResult().getUser_name());
     }
 
+    private void fetchLocation() {
+        if (ActivityCompat.checkSelfPermission (
+                mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(HomeAct.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE);
+            return;
+        }
 
-    private void init() {
-
-        binding.swipLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        Task<Location> task = fusedLocationProviderClient.getLastLocation();
+        task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
-            public void onRefresh() {
-                getAllShipRequest();
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    // isCurrentLocation = true;
+                    currentLocation = location;
+                    Log.e("ivCurrentLocation", "location = " + location);
+
+                    String address = ProjectUtil
+                            .getCompleteAddressString(mContext, currentLocation.getLatitude()
+                                    , currentLocation.getLongitude());
+
+                    if (TextUtils.isEmpty(binding.tvAddress.getText().toString().trim())) {
+                        binding.tvAddress.setText(address.trim());
+                        pickUpLatLng = new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude());
+                        setCurrentLocationMap(currentLocation);
+                    }
+
+                } else {
+                    startLocationUpdates();
+                    Log.e("ivCurrentLocation", "location = " + location);
+                }
             }
         });
 
-        getAllShipRequest();
+    }
 
-//        binding.btParcel.setOnClickListener(v -> {
-//            startActivity(new Intent(mContext,ParcelDetailAct.class));
+    private void setCurrentLocationMap(Location currentLocation) {
+        if (mMap != null) {
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_pin))
+                    .title(ProjectUtil.getCompleteAddressString(mContext, currentLocation.getLatitude(), currentLocation.getLongitude()));
+            mMap.addMarker(markerOptions);
+            LatLng latLng = new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,10));
+        }
+    }
+
+    // Trigger new location updates at interval
+    protected void startLocationUpdates() {
+
+        Log.e("hdasfkjhksdf", "Location = ");
+
+        // Create the location request to start receiving updates
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+
+        // Create LocationSettingsRequest object using location request
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        LocationSettingsRequest locationSettingsRequest = builder.build();
+
+        // Check whether location settings are satisfied
+        // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
+        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
+        settingsClient.checkLocationSettings(locationSettingsRequest);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        getFusedLocationProviderClient(this).requestLocationUpdates(mLocationRequest, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        if (locationResult != null) {
+                            Log.e("hdasfkjhksdf", "Location = " + locationResult.getLastLocation());
+                            currentLocation = locationResult.getLastLocation();
+                            String address = ProjectUtil.getCompleteAddressString(mContext, currentLocation.getLatitude(), currentLocation.getLongitude());
+
+                            if (TextUtils.isEmpty(binding.tvAddress.getText().toString().trim())) {
+                                binding.tvAddress.setText(address);
+                                setCurrentLocationMap(currentLocation);
+                            }
+                        } else {
+                            fetchLocation();
+                        }
+                    }
+                },
+                Looper.myLooper());
+    }
+
+    private void init() {
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(HomeAct.this);
+
+        binding.btInstant.setOnClickListener(v -> {
+            startActivity(new Intent(mContext, ParcelUploadAct.class));
+             //.putExtra(AppConstant.DEV_TYPE,AppConstant.INSTANT)
+        });
+
+//        binding.btSchedule.setOnClickListener(v -> {
+//            startActivity(new Intent(mContext, ParcelUploadAct.class)
+//              .putExtra(AppConstant.DEV_TYPE,AppConstant.SCHEDULE)
+//            );
+//        });
+
+//      binding.tvAddress.setOnClickListener(v -> {
+//          List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
+//          Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+//                  .build(this);
+//          startActivityForResult(intent,AUTOCOMPLETE_REQUEST_CODE_PICK_UP);
 //        });
 
         binding.navItems.tvMySending.setOnClickListener(v -> {
-            startActivity(new Intent(mContext,ParcelStatusAct.class));
+            startActivity(new Intent(mContext, ParcelStatusAct.class));
             binding.drawerLayout.closeDrawer(GravityCompat.START);
         });
 
-        binding.navItems.tvMessages.setOnClickListener(v -> {
-            startActivity(new Intent(mContext,ChatListAct.class));
-            binding.drawerLayout.closeDrawer(GravityCompat.START);
-        });
-
-        binding.navItems.tvMyProfile.setOnClickListener(v -> {
-            startActivity(new Intent(mContext,MyProfileAct.class));
-            binding.drawerLayout.closeDrawer(GravityCompat.START);
-        });
-
+//        binding.navItems.tvMessages.setOnClickListener(v -> {
+//            startActivity(new Intent(mContext,ChatListAct.class));
+//            binding.drawerLayout.closeDrawer(GravityCompat.START);
+//        });
+//
+//        binding.navItems.tvMyProfile.setOnClickListener(v -> {
+//            startActivity(new Intent(mContext,MyProfileAct.class));
+//            binding.drawerLayout.closeDrawer(GravityCompat.START);
+//        });
+//
         binding.navItems.tvLogout.setOnClickListener(v -> {
             logoutAppDialog();
             binding.drawerLayout.closeDrawer(GravityCompat.START);
@@ -130,59 +259,152 @@ public class HomeAct extends AppCompatActivity {
             binding.drawerLayout.openDrawer(GravityCompat.START);
         });
 
-        binding.ivAddAdress.setOnClickListener(v -> {
-           openAddParcelDialog();
-        });
-
     }
 
-    private void getAllShipRequest() {
-        ProjectUtil.showProgressDialog(mContext,false,getString(R.string.please_wait));
-        Api api = ApiFactory.getClientWithoutHeader(mContext).create(Api.class);
+//    private void openAddParcelDialog() {
+//        dialog = new Dialog(mContext, WindowManager.LayoutParams.MATCH_PARENT);
+//        dialogBinding = DataBindingUtil
+//                .inflate(LayoutInflater.from(mContext),R.layout.add_shipp_dialog,null,false);
+//        dialog.setContentView(dialogBinding.getRoot());
+//
+//        dialogBinding.ivBack.setOnClickListener(v -> {
+//            dialog.dismiss();
+//        });
+//
+//        dialogBinding.btUpload.setOnClickListener(v -> {
+//            dialog.dismiss();
+//        });
+//
+//      dialogBinding.etDropAdd.setOnClickListener(v -> {
+//            // Set the fields to specify which types of place data to
+//            // return after the user has made a selection.
+//            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
+//
+//            // Start the autocomplete intent.
+//            Intent intent = new Autocomplete.IntentBuilder(
+//                    AutocompleteActivityMode.FULLSCREEN, fields)
+//                    .build(mContext);
+//
+//            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_DESTINATION);
+//        });
+//
+//        dialogBinding.etPickAdd.setOnClickListener(v -> {
+//            // Set the fields to specify which types of place data to
+//            // return after the user has made a selection.
+//            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
+//
+//            // Start the autocomplete intent.
+//            Intent intent = new Autocomplete.IntentBuilder(
+//                    AutocompleteActivityMode.FULLSCREEN, fields)
+//                    .build(mContext);
+//
+//            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_PICK_UP);
+//        });
+//
+//        dialogBinding.etPickDate.setOnClickListener(v -> {
+//            DatePickerDialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
+//                @Override
+//                public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+//                    date.set(year, monthOfYear, dayOfMonth);
+//                    String dateString = new SimpleDateFormat("dd-MMM-yyyy").format(date.getTime());
+//                    dialogBinding.etPickDate.setText(dateString);
+//                    pickUpMilliseconds = ProjectUtil.convertDateIntoMillisecond(dateString);
+//                }
+//            }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE));
+//            datePickerDialog.getDatePicker().setMinDate(currentDate.getTimeInMillis());
+//            datePickerDialog.show();
+//        });
+//
+//        dialogBinding.etDropDate.setOnClickListener(v -> {
+//            DatePickerDialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
+//                @Override
+//                public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+//                    date.set(year, monthOfYear, dayOfMonth);
+//                    String dateString = new SimpleDateFormat("dd-MMM-yyyy").format(date.getTime());
+//                    dialogBinding.etDropDate.setText(dateString);
+//                    pickUpMilliseconds = ProjectUtil.convertDateIntoMillisecond(dateString);
+//                }
+//            }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE));
+//            datePickerDialog.getDatePicker().setMinDate(pickUpMilliseconds);
+//            datePickerDialog.show();
+//        });
+//
+//        dialogBinding.btUpload.setOnClickListener(v -> {
+//            if(TextUtils.isEmpty(dialogBinding.etPickAdd.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            } else if(TextUtils.isEmpty(dialogBinding.etDropAdd.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            } else if(TextUtils.isEmpty(dialogBinding.etPickDate.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            } else if(TextUtils.isEmpty(dialogBinding.etDropDate.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            } else if(TextUtils.isEmpty(dialogBinding.etRecipName.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            } else if(TextUtils.isEmpty(dialogBinding.etMobile.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            } else if(dialogBinding.spQuantity.getSelectedItemPosition() == 0) {
+//                Toast.makeText(mContext,getString(R.string.please_select_item_quantity), Toast.LENGTH_SHORT).show();
+//            } else if(dialogBinding.spItemCat.getSelectedItemPosition() == 0) {
+//                Toast.makeText(mContext,getString(R.string.please_select_item_category), Toast.LENGTH_SHORT).show();
+//            } else if(TextUtils.isEmpty(dialogBinding.etItemDetail.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            }  else if(TextUtils.isEmpty(dialogBinding.etDevInstruction.getText().toString().trim())) {
+//                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
+//            } else {
+//                paramHash = new HashMap<>();
+//                paramHash.put("user_id",modelLogin.getResult().getId());
+//                paramHash.put("pickup_location", dialogBinding.etPickAdd.getText().toString().trim());
+//                paramHash.put("pickup_lat",String.valueOf(pickUpLatLon.latitude));
+//                paramHash.put("pickup_lon",String.valueOf(pickUpLatLon.longitude));
+//                paramHash.put("drop_location",dialogBinding.etDropAdd.getText().toString().trim());
+//                paramHash.put("drop_lat",String.valueOf(dropOffLatLon.latitude));
+//                paramHash.put("drop_lon",String.valueOf(pickUpLatLon.longitude));
+//                paramHash.put("pickup_date",dialogBinding.etPickDate.getText().toString().trim());
+//                paramHash.put("dropoff_date",dialogBinding.etDropDate.getText().toString().trim());
+//                paramHash.put("recipient_name",dialogBinding.etRecipName.getText().toString().trim());
+//                paramHash.put("mobile_no",dialogBinding.etMobile.getText().toString().trim());
+//                paramHash.put("parcel_quantity",dialogBinding.spQuantity.getSelectedItem().toString());
+//                paramHash.put("parcel_category",dialogBinding.spItemCat.getSelectedItem().toString());
+//                paramHash.put("item_detail",dialogBinding.etItemDetail.getText().toString().trim());
+//                paramHash.put("dev_instruction",dialogBinding.etDevInstruction.getText().toString().trim());
+//                paramHash.put("direction_json","");
+//
+//                addShippingRequest(paramHash);
+//
+//            }
+//
+//        });
+//
+//        dialog.show();
+//
+//    }
 
-        HashMap<String,String> params = new HashMap<>();
-        params.put("user_id",modelLogin.getResult().getId());
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Call<ResponseBody> call = api.getAllShippingRequestApiCall(params);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                ProjectUtil.pauseProgressDialog();
-                binding.swipLayout.setRefreshing(false);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE_PICK_UP) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                pickUpLatLng = place.getLatLng();
                 try {
-                    String responseString = response.body().string();
-                    JSONObject jsonObject = new JSONObject(responseString);
-
-                    if(jsonObject.getString("status").equals("1")) {
-
-                        modelShipRequest = new Gson().fromJson(responseString,ModelShipRequest.class);
-
-                        AdapterShipRequest adapterShipRequest = new AdapterShipRequest(mContext,modelShipRequest.getResult());
-                        binding.rvRequest.setAdapter(adapterShipRequest);
-
-                        Log.e("responseStringdfsdfsd","responseString = " + responseString);
-
-                    } else {
-                        Toast.makeText(mContext, getString(R.string.no_request_found), Toast.LENGTH_SHORT).show();
-                        AdapterShipRequest adapterShipRequest = new AdapterShipRequest(mContext,null);
-                        binding.rvRequest.setAdapter(adapterShipRequest);
-                        // Toast.makeText(mContext, "Invalid Credentials", Toast.LENGTH_SHORT).show();
-                    }
-
+                    String address = ProjectUtil.getCompleteAddressString(mContext,
+                            place.getLatLng().latitude,
+                            place.getLatLng().longitude);
+                    binding.tvAddress.setText(address);
                 } catch (Exception e) {
-                    // Toast.makeText(mContext, "Exception = " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e("Exception","Exception = " + e.getMessage());
+                    e.printStackTrace();
+                    //setMarker(latLng);
                 }
 
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                // TODO: Handle the error.
+                Status status = Autocomplete.getStatusFromIntent(data);
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
             }
+        }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ProjectUtil.pauseProgressDialog();
-                binding.swipLayout.setRefreshing(false);
-            }
-
-        });
     }
 
     private void logoutAppDialog() {
@@ -213,226 +435,9 @@ public class HomeAct extends AppCompatActivity {
 
     }
 
-    private void openAddParcelDialog() {
-        dialog = new Dialog(mContext, WindowManager.LayoutParams.MATCH_PARENT);
-        dialogBinding = DataBindingUtil
-                .inflate(LayoutInflater.from(mContext),R.layout.add_shipp_dialog,null,false);
-        dialog.setContentView(dialogBinding.getRoot());
-
-        dialogBinding.ivBack.setOnClickListener(v -> {
-            dialog.dismiss();
-        });
-
-        dialogBinding.btUpload.setOnClickListener(v -> {
-            dialog.dismiss();
-        });
-
-      dialogBinding.etDropAdd.setOnClickListener(v -> {
-            // Set the fields to specify which types of place data to
-            // return after the user has made a selection.
-            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
-
-            // Start the autocomplete intent.
-            Intent intent = new Autocomplete.IntentBuilder(
-                    AutocompleteActivityMode.FULLSCREEN, fields)
-                    .build(mContext);
-
-            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_DESTINATION);
-        });
-
-        dialogBinding.etPickAdd.setOnClickListener(v -> {
-            // Set the fields to specify which types of place data to
-            // return after the user has made a selection.
-            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
-
-            // Start the autocomplete intent.
-            Intent intent = new Autocomplete.IntentBuilder(
-                    AutocompleteActivityMode.FULLSCREEN, fields)
-                    .build(mContext);
-
-            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE_PICK_UP);
-        });
-
-        dialogBinding.etPickDate.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
-                    date.set(year, monthOfYear, dayOfMonth);
-                    String dateString = new SimpleDateFormat("dd-MMM-yyyy").format(date.getTime());
-                    dialogBinding.etPickDate.setText(dateString);
-                    pickUpMilliseconds = ProjectUtil.convertDateIntoMillisecond(dateString);
-                }
-            }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE));
-            datePickerDialog.getDatePicker().setMinDate(currentDate.getTimeInMillis());
-            datePickerDialog.show();
-        });
-
-        dialogBinding.etDropDate.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
-                    date.set(year, monthOfYear, dayOfMonth);
-                    String dateString = new SimpleDateFormat("dd-MMM-yyyy").format(date.getTime());
-                    dialogBinding.etDropDate.setText(dateString);
-                    pickUpMilliseconds = ProjectUtil.convertDateIntoMillisecond(dateString);
-                }
-            }, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE));
-            datePickerDialog.getDatePicker().setMinDate(pickUpMilliseconds);
-            datePickerDialog.show();
-        });
-
-        dialogBinding.btUpload.setOnClickListener(v -> {
-            if(TextUtils.isEmpty(dialogBinding.etPickAdd.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            } else if(TextUtils.isEmpty(dialogBinding.etDropAdd.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            } else if(TextUtils.isEmpty(dialogBinding.etPickDate.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            } else if(TextUtils.isEmpty(dialogBinding.etDropDate.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            } else if(TextUtils.isEmpty(dialogBinding.etRecipName.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            } else if(TextUtils.isEmpty(dialogBinding.etMobile.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            } else if(dialogBinding.spQuantity.getSelectedItemPosition() == 0) {
-                Toast.makeText(mContext,getString(R.string.please_select_item_quantity), Toast.LENGTH_SHORT).show();
-            } else if(dialogBinding.spItemCat.getSelectedItemPosition() == 0) {
-                Toast.makeText(mContext,getString(R.string.please_select_item_category), Toast.LENGTH_SHORT).show();
-            } else if(TextUtils.isEmpty(dialogBinding.etItemDetail.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            }  else if(TextUtils.isEmpty(dialogBinding.etDevInstruction.getText().toString().trim())) {
-                Toast.makeText(mContext,getString(R.string.all_fields_are_mandatory), Toast.LENGTH_SHORT).show();
-            } else {
-                paramHash = new HashMap<>();
-                paramHash.put("user_id",modelLogin.getResult().getId());
-                paramHash.put("pickup_location", dialogBinding.etPickAdd.getText().toString().trim());
-                paramHash.put("pickup_lat",String.valueOf(pickUpLatLon.latitude));
-                paramHash.put("pickup_lon",String.valueOf(pickUpLatLon.longitude));
-                paramHash.put("drop_location",dialogBinding.etDropAdd.getText().toString().trim());
-                paramHash.put("drop_lat",String.valueOf(dropOffLatLon.latitude));
-                paramHash.put("drop_lon",String.valueOf(pickUpLatLon.longitude));
-                paramHash.put("pickup_date",dialogBinding.etPickDate.getText().toString().trim());
-                paramHash.put("dropoff_date",dialogBinding.etDropDate.getText().toString().trim());
-                paramHash.put("recipient_name",dialogBinding.etRecipName.getText().toString().trim());
-                paramHash.put("mobile_no",dialogBinding.etMobile.getText().toString().trim());
-                paramHash.put("parcel_quantity",dialogBinding.spQuantity.getSelectedItem().toString());
-                paramHash.put("parcel_category",dialogBinding.spItemCat.getSelectedItem().toString());
-                paramHash.put("item_detail",dialogBinding.etItemDetail.getText().toString().trim());
-                paramHash.put("dev_instruction",dialogBinding.etDevInstruction.getText().toString().trim());
-                paramHash.put("direction_json","");
-
-                addShippingRequest(paramHash);
-
-            }
-
-        });
-
-        dialog.show();
-
-    }
-
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE_PICK_UP) {
-            if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
-                pickUpLatLon = place.getLatLng();
-                try {
-                    String address = ProjectUtil.getCompleteAddressString(mContext,
-                            place.getLatLng().latitude,
-                            place.getLatLng().longitude);
-                    dialogBinding.etPickAdd.setText(address);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    //setMarker(latLng);
-                }
-
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                // TODO: Handle the error.
-                Status status = Autocomplete.getStatusFromIntent(data);
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-        } else {
-            if (resultCode == RESULT_OK) {
-
-                Place place = Autocomplete.getPlaceFromIntent(data);
-                dropOffLatLon = place.getLatLng();
-
-                try {
-                    String address = ProjectUtil.getCompleteAddressString(mContext,
-                            place.getLatLng().latitude,
-                            place.getLatLng().longitude);
-                    dialogBinding.etDropAdd.setText(address);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                Status status = Autocomplete.getStatusFromIntent(data);
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-
-        }
-
-    }
-
-
-    private void addShippingRequest(HashMap<String, String> paramHash) {
-        ProjectUtil.showProgressDialog(mContext,false,getString(R.string.please_wait));
-        Api api = ApiFactory.getClientWithoutHeader(mContext).create(Api.class);
-        Call<ResponseBody> call = api.addShippingRequestApiCall(paramHash);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                ProjectUtil.pauseProgressDialog();
-                try {
-                    String responseString = response.body().string();
-                    JSONObject jsonObject = new JSONObject(responseString);
-
-                    if(jsonObject.getString("status").equals("1")) {
-
-                        dialog.dismiss();
-                        pickUpMilliseconds = 0;
-
-                        if(modelShipRequest != null) {
-                            ModelShipRequest.Result data = new ModelShipRequest().new Result();
-                            data.setId(jsonObject.getJSONObject("result").getString("id"));
-                            data.setStatus(jsonObject.getJSONObject("result").getString("status"));
-                            data.setPickup_location(jsonObject.getJSONObject("result").getString("pickup_location"));
-                            data.setDrop_location(jsonObject.getJSONObject("result").getString("drop_location"));
-
-                            modelShipRequest.getResult().add(data);
-
-                            AdapterShipRequest adapterShipRequest = new AdapterShipRequest(mContext,modelShipRequest.getResult());
-                            binding.rvRequest.setAdapter(adapterShipRequest);
-
-                        } else {
-                            getAllShipRequest();
-                        }
-
-                        Log.e("responseString","responseString = " + responseString);
-
-                    } else {
-                        // Toast.makeText(mContext, "Invalid Credentials", Toast.LENGTH_SHORT).show();
-                    }
-
-                } catch (Exception e) {
-                    Toast.makeText(mContext, "Exception = " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e("Exception","Exception = " + e.getMessage());
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                ProjectUtil.pauseProgressDialog();
-            }
-
-        });
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
     }
 
 }

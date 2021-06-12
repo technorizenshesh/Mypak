@@ -118,7 +118,7 @@ public class GetStartedAct extends AppCompatActivity {
 
             FacebookSdk.setApplicationId(getString(R.string.facebook_app_id));
             FacebookSdk.sdkInitialize(mContext);
-            LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile", "user_friends"));
+            LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
             LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
@@ -141,7 +141,6 @@ public class GetStartedAct extends AppCompatActivity {
             anim.setStartOffset(20);
             anim.setRepeatMode(Animation.REVERSE);
             binding.cvFb.startAnimation(anim);
-
         });
 
         binding.cvGoogle.setOnClickListener(v -> {
@@ -171,6 +170,7 @@ public class GetStartedAct extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.e("tasktasktask","task = " + task.toString());
                         if (task.isSuccessful()) {
 
                             FirebaseUser user = mAuth.getCurrentUser();
@@ -179,32 +179,37 @@ public class GetStartedAct extends AppCompatActivity {
 
                             Log.e("kjsgdfkjdgsf","profilePhoto = " + profilePhoto);
                             Log.e("kjsgdfkjdgsf","name = " + user.getDisplayName());
-                            Log.e("kjsgdfkjdgsf","email = " + user.getEmail());
+                            // Log.e("kjsgdfkjdgsf","email = " + user.getEmail());
                             Log.e("kjsgdfkjdgsf","Userid = " + user.getUid());
 
                             socialLoginCall(user.getDisplayName(),
                                     user.getEmail(), profilePhoto,
-                                    user.getUid());
+                                    user.getUid(),user.getPhoneNumber());
 
                         } else {
                             Toast.makeText(GetStartedAct.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-
                         }
                     }
                 });
     }
 
-    private void socialLoginCall(String username,String email,String image,String socialId) {
+    private void socialLoginCall(String username,String email,String image,String socialId,String mobile) {
 
         ProjectUtil.showProgressDialog(mContext,false,getString(R.string.please_wait));
         Api api = ApiFactory.getClientWithoutHeader(mContext).create(Api.class);
 
         HashMap<String,String> paramHash = new HashMap<>();
         paramHash.put("user_name",username);
-        paramHash.put("email",email);
         paramHash.put("mobile","");
-        paramHash.put("'type'", AppConstant.USER);
+
+        if(email == null) {
+            paramHash.put("email","");
+        } else {
+            paramHash.put("email",email);
+        }
+
+        paramHash.put("type", AppConstant.USER);
        // paramHash.put("image",image);
         paramHash.put("register_id",registerId);
         paramHash.put("social_id",socialId);
@@ -294,7 +299,7 @@ public class GetStartedAct extends AppCompatActivity {
 
                                 socialLoginCall(user.getDisplayName(),
                                         user.getEmail(), String.valueOf(user.getPhotoUrl()),
-                                        user.getUid());
+                                        user.getUid(),user.getPhoneNumber());
 
                             }
 

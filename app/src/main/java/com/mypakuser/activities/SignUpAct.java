@@ -62,6 +62,7 @@ public class SignUpAct extends AppCompatActivity {
         });
 
         binding.btSignUp.setOnClickListener(v -> {
+
             if(TextUtils.isEmpty(binding.etName.getText().toString().trim())) {
                 Toast.makeText(mContext, getString(R.string.please_enter_username), Toast.LENGTH_SHORT).show();
             } else if(TextUtils.isEmpty(binding.etEmail.getText().toString().trim())) {

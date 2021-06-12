@@ -6,18 +6,30 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 
+import com.android.volley.toolbox.HttpResponse;
 import com.google.android.gms.maps.model.LatLng;
 import com.mypakuser.R;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class ProjectUtil {
 
@@ -72,6 +84,37 @@ public class ProjectUtil {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             activity.getWindow().setStatusBarColor(activity.getResources().getColor(R.color.orange));
         }
+    }
+
+    public static double CalculationByDistance(double lat1, double lng1, double lat2, double lng2) {
+        int Radius = 6371;// radius of earth in Km
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
+                * Math.sin(dLon / 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+        double valueResult = Radius * c;
+        double km = valueResult / 1;
+        DecimalFormat newFormat = new DecimalFormat("####");
+        int kmInDec = Integer.valueOf(newFormat.format(km));
+        double meter = valueResult % 1000;
+        int meterInDec = Integer.valueOf(newFormat.format(meter));
+        Log.i("Radius Value", "" + valueResult + "   KM  " + kmInDec
+                + " Meter   " + meterInDec);
+        return kmInDec;
+    }
+
+    public static double getKmFromLatLong(double lat1, double lng1, double lat2, double lng2) {
+        Location loc1 = new Location("A");
+        loc1.setLatitude(lat1);
+        loc1.setLongitude(lng1);
+        Location loc2 = new Location("B");
+        loc2.setLatitude(lat2);
+        loc2.setLongitude(lng2);
+        double distanceInMeters = loc1.distanceTo(loc2);
+        return distanceInMeters/1000;
     }
 
     public static String getCurrentDate() {

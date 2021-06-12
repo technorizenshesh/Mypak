@@ -12,6 +12,7 @@ import android.os.Bundle;
 
 import com.mypakuser.R;
 import com.mypakuser.databinding.ActivityMyProfileBinding;
+import com.mypakuser.newmodule.activities.ParcelStatusAct;
 import com.mypakuser.utils.ProjectUtil;
 
 public class MyProfileAct extends AppCompatActivity {
@@ -30,7 +31,7 @@ public class MyProfileAct extends AppCompatActivity {
     private void init() {
 
         binding.ivMySendings.setOnClickListener(v -> {
-            startActivity(new Intent(mContext,ParcelStatusAct.class));
+            startActivity(new Intent(mContext, ParcelStatusAct.class));
         });
 
         binding.cvLogout.setOnClickListener(v -> {

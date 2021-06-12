@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Mypak</string>
     <string name="places_api_key">AIzaSyCNs1wH7F3CUq1_tYEkN_9BjfAvKeJmBLw</string>
-    <string name="facebook_app_id">206211304268201</string>
-    <string name="fb_login_protocol_scheme">fb206211304268201</string>
+    <string name="facebook_app_id">602330774235551</string>
+    <string name="fb_login_protocol_scheme">fb602330774235551</string>
     <string name="welcome_to_mypack">Welcome to Mypack</string>
     <string name="dummy_text">Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum has been the industry\'s standard dummy text ever since Lorem Ipsum has been the industry\'s standard dummy text ever since</string>
     <string name="get_started">Get Started</string>
@@ -96,9 +96,12 @@
     <string name="accept">Accept</string>
     <string name="comments">Comments</string>
     <string name="bid_detail">Bid Details</string>
+    <string name="home">Home</string>
+    <string name="inter_parcel_delivery">Immediate Parcel Delivery</string>
+    <string name="scheduled_parcel_delivery">Scheduled Parcel Delivery</string>
+    <string name="fetch_loc">Fetch Location...</string>
 
     <string-array name="parcel_quantity">
-        <item>Select Quantity</item>
         <item>Less then 1KG</item>
         <item>1KG - 5KG</item>
         <item>5KG - 10KG</item>
@@ -108,15 +111,21 @@
         <item>25KG - 30KG</item>
         <item>30KG - 35KG</item>
         <item>35KG - 40KG</item>
-        <item>40KG Above</item>
+        <item>40KG - 50KG</item>
+        <item>50KG - 60KG</item>
+        <item>60KG - 70KG</item>
+        <item>70KG - 80KG</item>
+        <item>80KG - 90KG</item>
+        <item>90KG - 100KG</item>
+        <item>Above 100KG</item>
     </string-array>
 
     <string-array name="vehicle_type">
-        <item>Select Vehicle Type</item>
         <item>Bicycle</item>
         <item>Motorcycle</item>
-        <item>VAN</item>
-        <item>Any</item>
+        <item>Bil</item>
+        <item>Cash Car</item>
+        <item>Truck</item>
     </string-array>
 
     <string-array name="parcel_item_category">
@@ -129,5 +138,50 @@
         <item>Medical</item>
         <item>Other</item>
     </string-array>
+
+    <string name="need_permission">Need Permissions</string>
+    <string name="goto_setting">GOTO SETTINGS</string>
+    <string name="this_app_needs">This app needs permission to use this feature. You can grant them in app settings.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="next">Next</string>
+    <string name="your_current_location">Your current Location :</string>
+    <string name="where_it_should_be_picked_up_from">Where it should be picked up from</string>
+    <string name="please_pick_loc">Please select pickup location</string>
+    <string name="where_should_it_be_delivered">Where should it be delivered</string>
+    <string name="please_dev_loc">Please select delivery location</string>
+    <string name="what_do_you_want_to_send">What do you want to send?</string>
+    <string name="select_dev_addrss">Select delivery address</string>
+    <string name="title">Title</string>
+    <string name="e_g_office_chair">(e.g Office chair)</string>
+    <string name="descp">Description</string>
+    <string name="for_future_delivery_set_date_and_time_optiona">For future delivery set date and time (Optional)</string>
+    <string name="select_date_and_time">Select date and time</string>
+    <string name="make_parcel_request">Make Parcel Request</string>
+    <string name="cancel">Cancel</string>
+    <string name="please_enter_title">Please enter title</string>
+    <string name="please_enter_desp">Please enter description</string>
+    <string name="please_upload_parcel_photo">Please upload parcel photo</string>
+    <string name="select_package_size">Select Package Size</string>
+    <string name="select_your_preferred_vehicle">Select your preferred vehicle</string>
+    <string name="welcome_mypak_moroccan_first_and_smart_transportation_app">Welcome Mypak moroccan first and smart transportation app</string>
+    <string name="summary">Payment Summary</string>
+    <string name="pay_now">Pay Now</string>
+    <string name="vehivle_charge_per_km">Vehivle charge per/Km</string>
+    <string name="parcel_distance_in_km">Parcel distance in Km</string>
+    <string name="to_pay">To Pay</string>
+    <string name="vehicle_name">Vehicle name</string>
+    <string name="cash_on_visit">Cash (On Visit)</string>
+    <string name="online_payment">Online Payment</string>
+    <string name="please_select_pay_menthod">Please select payment method</string>
+    <string name="order_history">Order History</string>
+    <string name="delivery_address">Delivery Address</string>
+    <string name="quantity">Quantity :</string>
+    <string name="payment_type">Payment Type :</string>
+    <string name="total_pay">Total Pay :</string>
+    <string name="request_to_driver">Request to driver</string>
+    <string name="near_by_drivers">Near By Drivers</string>
+    <string name="list">List</string>
+    <string name="map">Map</string>
 
 </resources>

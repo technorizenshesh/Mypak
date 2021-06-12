@@ -148,6 +148,9 @@
      @POST("get_restaurant_item_meals")
      Call<ResponseBody> getStoreMealsCatApiCall();
 
+     @POST("car_list")
+     Call<ResponseBody> getAllCars();
+
      @FormUrlEncoded
      @POST("login")
      Call<ResponseBody> loginApiCall(@FieldMap Map<String, String> params);
@@ -155,6 +158,14 @@
      @FormUrlEncoded
      @POST("change_password")
      Call<ResponseBody> changePassCall(@FieldMap Map<String, String> params);
+
+     @FormUrlEncoded
+     @POST("get_shipping_history")
+     Call<ResponseBody> getOrderHistoryCall(@FieldMap Map<String, String> params);
+
+     @FormUrlEncoded
+     @POST("get_nearest_driver")
+     Call<ResponseBody> getNearByDriversCall(@FieldMap Map<String, String> params);
 
      @FormUrlEncoded
      @POST("get_treater_details")
